@@ -1,0 +1,174 @@
+﻿@using Library.Enums;
+@model  Library.Models.Book
+@{
+    ViewBag.Title = "Book";
+    // Layout = null;
+}
+
+<div class="panel panel-body" style="min-height:256px">
+
+    <div class="col-md-3" style="border-right: 1px solid black">
+
+        @*@{ Html.RenderAction("SideMenu", "Test");}*@
+        <div class="well">
+            <h3><b>Borrowed Books</b></h3>
+            @*<a href="#" class="btn btn-primary" onclick="ShowBook(0)">New</a>*@
+        </div>
+        <table class="display">
+            <thead>
+                <tr>
+
+                    <th>
+                        Title
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach(var order in ViewBag.myOrders){
+                   if (order.Status == 3)
+                   {
+                       continue;
+                   }
+                    <tr>
+                        <td>@order.BookTitle</td>
+                        <td>@Enum.GetName(typeof(Status), order.Status)</td>
+                        <td>
+                            <a href="/Order/Cancel?OrderId=@order.Id"> 
+                                <span style="color:red">&times;</span>
+                            </a>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+
+
+        <div style="text-align:center;display:none" id="loaderDivGet">
+            <img src="~/Images/InternetSlowdown_Day.gif" width="150" />
+        </div>
+     </div>
+
+    <div class="col-md-9">
+
+        <div class="well">
+            <h3><b>Our Books</b></h3>
+            @*<a href="#" class="btn btn-primary" onclick="ShowBook(0)">New</a>*@
+        </div>
+        <table class="display" id="MyDataTable">
+            <thead>
+                <tr>
+
+                    <th>
+                        Title
+                    </th>
+                    <th>
+                        Author
+                    </th>
+                    
+                    <th>
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+        <div class="modal fade" id="myModal1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <a href="#" class="close" data-dismiss="modal">&times;</a>
+                        <h3 class="modal-title">AddEdit Book</h3>
+                    </div>
+                    <div class="modal-body" id="myModalBodyDiv1">
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+        <div style="text-align:center;display:none" id="loaderDivGet">
+            <img src="~/Images/InternetSlowdown_Day.gif" width="150" />
+        </div>
+        <input type="hidden" id="hiddenBookId" />
+    </div>
+
+  
+</div>
+@section scripts{
+
+    <script>
+
+        $(document).ready(function () {
+
+            // $("#MyDataTable").DataTable();
+
+            BindDataTable();
+        })
+
+        var BindDataTable = function (response) {
+
+            ///////////////////////////////////////
+
+            var table = $('#MyDataTable').DataTable({
+                "proccessing": true,
+                "serverSide": true,
+                "ajax": ({
+                    url: "@Url.Action("GetBookRecord", "Book")",
+                type: 'POST'
+            }),
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search...",
+                "proccessing":'<img src="~/Images/InternetSlowdown_Day.gif" width="150" /> Loading ...'
+        },
+        "columns": [
+
+                    { "data": "Title" },
+                    { "data": "Auther" },
+                     {
+                     "data": "Id",
+                    "render": function (BookId, type, full, meta) {
+                        debugger
+                        return '<a href="#" onclick="ShowBook(' + BookId + ','+false+')">Borrow</a> &nbsp'
+                        //'<a href="#" onclick="AddEditBook(' + BookId + ',' + true + ')"><i class="glyphicon glyphicon-trash"></i></a>'
+                    }
+            },
+        ]
+        });
+        ///////////////////////////////
+        }
+
+
+
+        var ShowBook = function (BookId) {
+
+            var url = "/Book/AddEditBook?BookId=" + BookId + "&borrow=" +true;
+
+            $("#myModalBodyDiv1").load(url, function () {
+                $("#myModal1").modal("show");
+
+            })
+
+        }
+
+
+    </script>
+
+}

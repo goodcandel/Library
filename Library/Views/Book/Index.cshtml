@@ -1,0 +1,127 @@
+﻿@model  Library.Models.Book
+@{
+    ViewBag.Title = "Book";
+    // Layout = null;
+}
+
+<div class="panel panel-body" style="min-height:256px">
+
+    <div class="col-md-3">
+
+        @*@{ Html.RenderAction("SideMenu", "Test");}*@
+
+    </div>
+
+    <div class="col-md-9">
+
+        <div class="well">
+            <a href="#" class="btn btn-primary" onclick="AddEditBook(0)">New</a>
+        </div>
+        <table class="display" id="MyDataTable">
+            <thead>
+                <tr>
+                  
+                    <th>
+                        Title
+                    </th>
+                    <th>
+                        Author
+                    </th>
+                    <th>
+                        Copies Number
+                    </th>
+                    <th>
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+        <div class="modal fade" id="myModal1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <a href="#" class="close" data-dismiss="modal">&times;</a>
+                        <h3 class="modal-title">AddEdit Book</h3>
+                    </div>
+                    <div class="modal-body" id="myModalBodyDiv1">
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+        <div style="text-align:center;display:none" id="loaderDivGet">
+            <img src="~/Images/InternetSlowdown_Day.gif" width="150" />
+        </div>
+        <input type="hidden" id="hiddenBookId" />
+    </div>
+</div>
+@section scripts{
+
+<script>
+
+        $(document).ready(function () {
+
+            // $("#MyDataTable").DataTable();
+
+            BindDataTable();
+        })
+
+        var BindDataTable = function (response) {
+
+            ///////////////////////////////////////
+
+            var table = $('#MyDataTable').DataTable({
+                "proccessing": true,
+                "serverSide": true,
+                "ajax": ({
+                    url: "@Url.Action("GetBookRecord", "Book")",
+                type: 'POST'
+            }),
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search...",
+                "proccessing":'<img src="~/Images/InternetSlowdown_Day.gif" width="150" /> Loading ...'
+        },
+        "columns": [
+           
+                    { "data": "Title" },
+                    { "data": "Auther" },
+                    { "data": "CopiesNumber" },
+                    {
+                     "data": "Id",
+                    "render": function (BookId, type, full, meta) {
+                        debugger
+                        return '<a href="#" onclick="AddEditBook(' + BookId + ','+false+')"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp'+
+                        '<a href="#" onclick="AddEditBook(' + BookId + ',' + true + ')"><i class="glyphicon glyphicon-trash"></i></a>'
+                    }
+            },
+        ]
+        });
+        ///////////////////////////////
+        }
+
+  
+
+        var AddEditBook = function (BookId,Isdelete) {
+
+            var url = "/Book/AddEditBook?BookId=" + BookId + "&delete=" + Isdelete;
+
+            $("#myModalBodyDiv1").load(url, function () {
+                $("#myModal1").modal("show");
+
+            })
+
+        }
+
+
+</script>
+
+}

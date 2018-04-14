@@ -1,0 +1,163 @@
+﻿@model  Library.Models.BookOrder
+@{
+    ViewBag.Title = "Admin Orders";
+    // Layout = null;
+}
+
+<div class="panel panel-body" style="min-height:256px">
+
+    <div class="col-md-3">
+
+        @*@{ Html.RenderAction("SideMenu", "Test");}*@
+
+    </div>
+
+    <div class="col-md-9">
+
+        <div class="well">
+            @*<a href="#" class="btn btn-primary" onclick="ShowBook(0)">New</a>*@
+        </div>
+        <table class="display" id="MyDataTable">
+            <thead>
+                <tr>
+
+                    <th>
+                        Borrower Name
+                    </th>
+                    <th>
+                        Book Title
+                    </th>
+                    <th>
+                        Created At
+                    </th>
+                    <th>
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+        <div class="modal fade" id="myModal1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <a href="#" class="close" data-dismiss="modal">&times;</a>
+                        <h3 class="modal-title">Order</h3>
+                    </div>
+                    <div class="modal-body" id="myModalBodyDiv1">
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+        <div style="text-align:center;display:none" id="loaderDivGet">
+            <img src="~/Images/InternetSlowdown_Day.gif" width="150" />
+        </div>
+        <input type="hidden" id="hiddenBookId" />
+    </div>
+</div>
+@section scripts{
+
+    <script>
+
+        $(document).ready(function () {
+
+            // $("#MyDataTable").DataTable();
+
+            BindDataTable();
+        })
+
+        var BindDataTable = function (response) {
+
+            ///////////////////////////////////////
+
+            var table = $('#MyDataTable').DataTable({
+                "proccessing": true,
+                "serverSide": true,
+                "ajax": ({
+                    url: "@Url.Action("GetBookRecord", "Order")",
+                type: 'POST'
+            }),
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search...",
+                "proccessing":'<img src="~/Images/InternetSlowdown_Day.gif" width="150" /> Loading ...'
+        },
+        "columns": [
+
+                    { "data": "BorrowerName" },
+                    { "data": "BookTitle" },
+                    {
+                        "data": "Created_At",
+                        "render": function (date) {
+                            return moment(date).format('MMMM Do YYYY, h:mm:ss a')
+                        }
+                    },
+                     {
+                     "data": "Id",
+                     "render": function (OrderId, type, full, meta) {
+
+                        debugger
+                        if (full.Status == 0)
+                        {
+                            return '<a href="#" class="btn btn-success" onclick="AcceptOrder(' + OrderId + ',' + true + ')">Accept</a> &nbsp' +
+                           '<a href="#"  class="btn btn-danger"    onclick="AcceptOrder(' + OrderId + ',' + false + ')">Reject</a>'
+
+                        } else {
+                            if(full.Status==1)
+                                return '<span class="label label-success">Accepted</span>'
+                            else if (full.Status == 2) {
+                                return '<span class="label label-danger">Rejected</span>'
+
+                            }
+                            else if (full.Status == 3) {
+                                return '<span class="label label-danger">Cancelled By User</span>'
+
+                            }
+                        }
+                       }
+            },
+        ]
+        });
+        ///////////////////////////////
+        }
+
+
+
+        var AcceptOrder = function (OrderId, Accepted) {
+            $("#loaderDivGet").show();
+
+            //var url = "/Order/AcceptOrder?BookId=" + OrderId + "&Accepted=" + Accepted;
+
+            //$("#myModalBodyDiv1").load(url, function () {
+            //    $("#myModal1").modal("show");
+
+            //})
+            $.ajax({
+
+                type: "POST",
+                url: "/Order/AcceptOrder?OrderId=" + OrderId + "&Accepted=" + Accepted,
+                //data: ,
+                contentType: 'application/json',
+                datatype: "json",
+                success: function() {
+                    $("#loaderDivGet").hide();
+                 //   $("#myModal").modal("hide");
+                    window.location.href = "/Order/GetAdminOrder";
+
+                }
+
+            })
+        }
+
+
+    </script>
+
+}
